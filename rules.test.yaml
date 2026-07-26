@@ -1,0 +1,78 @@
+# SANDBOX rules file — see TESTING.md. Points at dummy test calendars/reminders only, so
+# a full test day can be run without touching real commitments, and uses short
+# floors/retries so scenarios don't require waiting real hours between steps.
+#
+# Run the server against this file with:
+#   TIMEBLOCK_RULES_PATH=rules.test.yaml TIMEBLOCK_STATE_PATH=$HOME/.timeblock-agent/state.test.json \
+#     .venv/bin/python -m uvicorn timeblock_agent.server:app --host 0.0.0.0 --port 8787
+#
+# Manual one-time setup this file assumes (see TESTING.md):
+#   - Calendar.app: a "Test Bucket" calendar (dummy bucket/fixed/specific events)
+#   - Calendar.app: a "Task Blocks (Test)" calendar (agent-authored test output —
+#     kept separate from your real "Task Blocks" calendar so testing never mixes in)
+#   - Reminders.app: a "Test Reminders" list with a few dummy reminders
+#   - buckets.test.md (already in the repo) — set TIMEBLOCK_BUCKETS_PATH=buckets.test.md
+#     alongside this file so bucket classification is deterministic during testing
+
+# --- Day boundary detection ---
+# Set close to "now" when you sit down to test so the floor confirmation fires almost
+# immediately instead of waiting until a real 09:00/22:00.
+morning_checkin_floor: "00:00"
+evening_checkin_floor: "23:59"
+day_boundary_gap_hours: 0.05   # ~3 minutes — lets you exercise the implicit-gap fallback quickly
+floor_confirmation_retry_minutes: 2
+
+# --- Trigger timing ---
+safety_backstop_minutes: 5
+followup_delay_unexpected_minutes: 2
+followup_delay_continuing_minutes: 3
+
+# --- Block sizing ---
+min_block_minutes: 10
+buffer_block_minutes: 5
+
+# --- Agent-authored blocks ---
+# A dedicated test-only destination calendar, kept fully separate from the real "Task
+# Blocks" calendar — nothing this file's test runs write ever lands in production data.
+agent_calendar: "Task Blocks (Test)"
+
+# --- Calendars in scope ---
+# include-only: ONLY "Test Bucket" is ever classified/touched. Everything else in your
+# real calendars is invisible to the agent while running against this file.
+calendars:
+  include: ["Test Bucket"]
+  exclude: []
+
+reminder_lists:
+  include: ["Test Reminders"]
+  exclude: []
+
+# --- Protected buffers ---
+protected_buffers:
+  - match: ["buffer", "wind down", "wind-down", "test buffer"]
+    allow_goal_fill: true
+  - match: ["goal time"]
+    allow_goal_fill: true
+
+# --- Classification hints (same as production) ---
+# Bucket-vs-specific judgment comes from buckets.test.md (via TIMEBLOCK_BUCKETS_PATH), not
+# a keyword list here — see buckets.test.md for the deterministic sandbox descriptions.
+always_fixed_hints: ["class", "lecture", "meeting", "call", "appointment"]
+
+# --- Goal-fill weighting ---
+# max_minutes_per_goal set low (vs. production's 180) so a "Balanced" (~150min) test
+# budget exceeds one goal's cap and exercises the multi-goal-split path.
+goal_fill:
+  weight_staleness: 0.6
+  weight_priority: 0.4
+  max_minutes_per_goal: 90
+
+# --- Weekly review ---
+# Was 0.003 (~4-5 min) to exercise Scenario 13 live in one sitting — confirmed working,
+# reverted to something sane so it doesn't fire constantly for the rest of testing.
+weekly_review_interval_days: 1
+weekly_review_retry_minutes: 60
+
+# --- Conversational reminder intake via Telegram ---
+reminder_intake_list: "Test Reminders"
+reminder_intake_timeout_minutes: 30

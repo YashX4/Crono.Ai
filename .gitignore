@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+logs/
+graphify-out/
+fake_sandbox/test_logs/
+
+# Personal runtime config — copy from the .example templates instead
+rules.yaml
+buckets.md
+preferences.md
+
+# Internal build/testing journals — not part of the public repo
+private/

@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  import-check:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - run: pip install -r requirements.txt
+      - name: Import every module
+        run: |
+          python -c "
+          import pkgutil, importlib, timeblock_agent
+          for _, name, _ in pkgutil.iter_modules(timeblock_agent.__path__, 'timeblock_agent.'):
+              importlib.import_module(name)
+              print('OK:', name)
+          "

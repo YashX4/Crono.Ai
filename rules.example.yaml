@@ -1,0 +1,111 @@
+# Adaptive Time-Blocking Agent — rules config
+# Times of day are 24h "HH:MM" local time. Durations are minutes unless noted.
+#
+# Copy this file to rules.yaml and edit it for your own setup — rules.yaml is
+# gitignored so your personal calendar/reminder-list names never get committed.
+#   cp rules.example.yaml rules.yaml
+
+# --- Day boundary detection ---
+morning_checkin_floor: "09:00"   # day_start confirmation ("Are you up?") won't ask before this
+evening_checkin_floor: "22:00"   # day_end confirmation ("Done for the day?") won't ask before this
+day_boundary_gap_hours: 4        # implicit day boundary if this many hours pass with no run at all
+floor_confirmation_retry_minutes: 30  # re-ask "are you up?"/"done for the day?" this often if unanswered
+
+# --- Trigger timing ---
+# No general-purpose hourly ping anymore — only real block start/end (plus day-boundary
+# floors and follow-up delays) wake the scheduler or send a notification. safety_backstop_minutes
+# is NOT a user-facing cadence; it's purely an internal fallback interval used if
+# compute_next_trigger ever ends up with nothing else to schedule (see state.py).
+safety_backstop_minutes: 60
+followup_delay_unexpected_minutes: 30    # replan delay after "unexpected plan came up"
+followup_delay_continuing_minutes: 60    # replan delay after "continuing current task longer"
+
+# --- Block sizing ---
+min_block_minutes: 15       # smallest task block the agent will ever create
+buffer_block_minutes: 15    # best-effort padding between back-to-back agent task blocks
+
+# --- Agent-authored blocks ---
+# Dedicated calendar for task blocks the agent creates inside your buckets. Keeping these
+# in their own calendar (rather than a title prefix) gives free color-coding in Calendar.app
+# and any macOS widgets, and makes "what did the agent create" unambiguous.
+# Create this calendar once in Calendar.app before the first run.
+agent_calendar: "Task Blocks"
+
+# --- Calendars in scope ---
+# Empty include = consider all calendars. Exclude always wins over include.
+# Calendars here are hard-excluded from FLEXIBLE consideration entirely — never classified,
+# never touched — rather than left to per-cycle judgment. Everything else gets classified
+# fresh each cycle from context (see classification hints below), since bucket/block shape
+# changes across summer vs. school semesters and shouldn't need a rules.yaml edit to keep up.
+#
+# Fill exclude in with any calendars that should never be touched — e.g. a shared/family
+# calendar, a holidays calendar, or anything that isn't your own schedulable time.
+calendars:
+  include: []
+  exclude: []
+
+reminder_lists:
+  include: []
+  exclude: []
+
+# --- Protected buffers ---
+# Blocks the agent must never task-fill or shorten (e.g. wind-down time), matched by a
+# case-insensitive substring against the event title OR its calendar name. Still eligible
+# for goal-fill unless allow_goal_fill is false.
+#
+# "goal time" is required by the day-start goal-time prompt (see docs/rules.md) — when you
+# pick Light/Balanced/Heavy, the agent carves a new "Goal Time" bucket out of whichever
+# real bucket ranks lowest priority that day, and this entry is what lets it actually get
+# filled with goal work rather than sit empty (it's a synthetic bucket, never one you
+# create yourself). Don't remove this entry unless you're intentionally disabling that
+# feature.
+protected_buffers:
+  - match: ["buffer", "wind down", "wind-down"]
+    allow_goal_fill: true
+  - match: ["goal time"]
+    allow_goal_fill: true
+
+# --- Classification hints ---
+# Every event gets one of three tags each cycle:
+#   FIXED             - real commitments (meetings, classes, attendees, location). Never touched.
+#   FLEXIBLE_BUCKET    - a generic/open-ended container that should be filled with a specific
+#                        task from Reminders or a goal (e.g. "Work", "HobbyMaxxing").
+#   FLEXIBLE_SPECIFIC  - already names a concrete, self-contained activity (e.g. "Gym", "Lunch").
+#                        Movable/resizable during a reshuffle, but never filled/replaced.
+# Ambiguous FIXED-vs-FLEXIBLE cases default to FIXED; ambiguous bucket-vs-specific cases
+# default to FLEXIBLE_SPECIFIC (safer to leave a block alone than to overwrite its content).
+#
+# always_fixed_hints is the one hard-enforced rule left here: a title match forces FIXED
+# in code before the model ever sees the event (real commitments are too costly to get
+# wrong the other way). Bucket-vs-specific judgment is NOT a keyword list — see buckets.md
+# for the user-editable freeform description of what counts as a bucket, since bucket
+# names change over time (e.g. once school starts) and a description generalizes to a
+# renamed bucket in a way exact keyword matching can't.
+always_fixed_hints: ["class", "lecture", "meeting", "call", "appointment"]
+
+# --- Goal-fill weighting ---
+# How spare time picks a goal from ~/goals/*.md: weight_staleness favors what hasn't been
+# touched recently, weight_priority favors the goal's own declared priority. Should sum to 1.0.
+# max_minutes_per_goal caps how much of a single day's goal-time budget any one goal can
+# get credited — once a goal hits this, the next-highest-scoring goal (excluding this one)
+# gets the remainder instead of piling more onto one task (see docs/rules.md §2).
+goal_fill:
+  weight_staleness: 0.6
+  weight_priority: 0.4
+  max_minutes_per_goal: 180
+
+# --- Weekly review ---
+# How often preferences.md's "## Observations" section gets a new entry (see docs/rules.md,
+# preferences.py). weekly_review_retry_minutes is the same "don't return a stale/now
+# trigger" retry cadence morning/evening floors already use if the review is overdue when
+# a tick notices it, rather than immediately.
+weekly_review_interval_days: 7
+weekly_review_retry_minutes: 60
+
+# --- Conversational reminder intake via Telegram ---
+# The Reminders.app list new reminders created via a Telegram text conversation get filed
+# into (see docs/rules.md §10). Must already exist — this doesn't auto-create a list.
+# reminder_intake_timeout_minutes: a clarification thread expires this long after your last
+# reply, so a later unrelated text doesn't get misread as continuing a stale conversation.
+reminder_intake_list: "Reminders"
+reminder_intake_timeout_minutes: 30
