@@ -1,4 +1,4 @@
-# Crono.Ai
+# Crono.ai
 
 An adaptive time-blocking agent for macOS. It reads generic "bucket" blocks on your
 Calendar (e.g. "Work 9-12", "Hobby 6-8"), fills them in with specific tasks pulled from
@@ -64,7 +64,7 @@ From here, pick one of the two ways to actually run it:
 
 ### Option A — Full experience (recommended)
 
-Double-click **`Start Crono.Ai.command`** in the repo root. It starts the server and the
+Double-click **`Start Crono.ai.command`** in the repo root. It starts the server and the
 menu bar app together — no terminal typing needed after initial setup, and it no-ops if
 either is already running.
 
@@ -116,7 +116,7 @@ scripts/                  live-test and utility scripts (must run from Terminal.
 fake_sandbox/             offline, assertion-based automated test suite — no Calendar/
                           Reminders access, no wall-clock waiting
 docs/                     scheduling-logic and goals-mechanism reference docs
-Start Crono.Ai.command     double-clickable launcher: server + menu bar app together
+Start Crono.ai.command     double-clickable launcher: server + menu bar app together
 rules.yaml / buckets.md   your personal config (gitignored — copy from the .example files)
 ~/goals/*.md              your long-term goals (frontmatter + notes + append-only log)
 ~/timeblock-logs/         daily completion log, one file per day

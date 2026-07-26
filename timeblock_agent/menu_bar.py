@@ -1,4 +1,4 @@
-"""macOS menu bar control + status app for the Crono.Ai server (see ROADMAP.md's "drop
+"""macOS menu bar control + status app for the Crono.ai server (see ROADMAP.md's "drop
 passwordless-sudo requirement, add a menu bar control app"). Runs as its OWN separate
 process, independent of the main FastAPI server (server.py) — a pure control/status
 layer, never touches EventKit/Claude itself.
@@ -54,9 +54,9 @@ class CronoMenuBarApp(rumps.App):
     def __init__(self):
         # template=True: a black-glyph-on-transparent PNG that macOS recolors
         # automatically for light/dark menu bars, same convention every other menu bar
-        # icon uses — falls back to the "Crono.Ai" text title if the asset is missing.
+        # icon uses — falls back to the "Crono.ai" text title if the asset is missing.
         icon_path = str(_MENUBAR_ICON) if _MENUBAR_ICON.exists() else None
-        super().__init__("Crono.Ai", title=None if icon_path else "⏱", icon=icon_path, template=True)
+        super().__init__("Crono.ai", title=None if icon_path else "⏱", icon=icon_path, template=True)
         self.status_item = rumps.MenuItem("Status: —")  # no callback = disabled/non-clickable
         self.prevent_sleep_item = rumps.MenuItem("Prevent Sleep", callback=self.toggle_prevent_sleep)
         self.agent_active_item = rumps.MenuItem("Agent Active", callback=self.toggle_agent_active)
@@ -115,7 +115,7 @@ class CronoMenuBarApp(rumps.App):
     def _call_server(self, path: str) -> bool:
         if not WEBHOOK_TOKEN:
             logger.error("WEBHOOK_TOKEN not set in .env — cannot call %s", path)
-            rumps.alert("Crono.Ai", "WEBHOOK_TOKEN isn't set in .env — can't control the server.")
+            rumps.alert("Crono.ai", "WEBHOOK_TOKEN isn't set in .env — can't control the server.")
             return False
         try:
             resp = httpx.post(f"{SERVER_BASE_URL}{path}", json={"token": WEBHOOK_TOKEN}, timeout=10)
@@ -123,7 +123,7 @@ class CronoMenuBarApp(rumps.App):
             return True
         except Exception:
             logger.exception("Failed to call %s", path)
-            rumps.alert("Crono.Ai", f"Couldn't reach the server at {SERVER_BASE_URL} — is it running?")
+            rumps.alert("Crono.ai", f"Couldn't reach the server at {SERVER_BASE_URL} — is it running?")
             return False
 
     # --- Settings / freeform docs: plain "open" shortcuts, no server round-trip needed
@@ -132,7 +132,7 @@ class CronoMenuBarApp(rumps.App):
     def open_settings(self, _sender: rumps.MenuItem) -> None:
         if not WEBHOOK_TOKEN:
             logger.error("WEBHOOK_TOKEN not set in .env — cannot open settings")
-            rumps.alert("Crono.Ai", "WEBHOOK_TOKEN isn't set in .env — can't open settings.")
+            rumps.alert("Crono.ai", "WEBHOOK_TOKEN isn't set in .env — can't open settings.")
             return
         subprocess.run(["open", f"{SERVER_BASE_URL}/settings?token={WEBHOOK_TOKEN}"])
 

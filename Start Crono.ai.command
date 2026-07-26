@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Double-click this file to start Crono.Ai: the server (if not already running) + the
+# Double-click this file to start Crono.ai: the server (if not already running) + the
 # menu bar app together. Must be a real double-click in Finder (or opened via Terminal
 # directly) — a .command file always runs inside a genuine Terminal.app process, which
 # is what carries the entitlement to trigger the real Calendar/Reminders permission
@@ -63,11 +63,11 @@ for _ in 1 2 3 4 5 6 7 8; do
 done
 
 if [ "$started_ok" = "1" ]; then
-  echo "Crono.Ai is running — look for the ⏱ icon in your menu bar."
+  echo "Crono.ai is running — look for the ⏱ icon in your menu bar."
   # Matched by window NAME, not tty: once this shell exits, Terminal reports `missing
   # value` for that window's tty property (confirmed live), so a tty-based match can
   # never find its own window after the fact — name stays stable either way.
-  ( sleep 2; osascript -e 'tell application "Terminal" to close (every window whose name contains "Start Crono.Ai.command")' ) &
+  ( sleep 2; osascript -e 'tell application "Terminal" to close (every window whose name contains "Start Crono.ai.command")' ) &
   disown
 else
   echo "Something didn't start correctly. Check the logs:"

@@ -528,7 +528,7 @@ def render_settings_form(raw: dict, token: str, error: Optional[str] = None, sav
 <html>
 <head>
 <meta charset="utf-8">
-<title>Crono.Ai Settings</title>
+<title>Crono.ai Settings</title>
 <style>
 {_STYLE}
 </style>
@@ -539,7 +539,7 @@ def render_settings_form(raw: dict, token: str, error: Optional[str] = None, sav
   <div class="page-header">
     <div class="page-header__inner">
       <span class="eyebrow">Settings</span>
-      <h1>Crono.Ai</h1>
+      <h1>Crono.ai</h1>
       {banner}
     </div>
   </div>

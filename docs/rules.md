@@ -1,4 +1,4 @@
-# How Crono.Ai schedules your day, right now
+# How Crono.ai schedules your day, right now
 
 This is a plain-language explanation of the actual decision logic — what the code does
 and why — as opposed to `rules.yaml`, which is just the numeric/text knobs that logic
